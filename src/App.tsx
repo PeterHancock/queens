@@ -14,7 +14,7 @@ function App() {
         A clone of the Linkedin puzzle "Queens"
       </p>
       <div>
-        <Board width={400} height={400} />
+        <Board width={800} />
       </div>
       
       </div>

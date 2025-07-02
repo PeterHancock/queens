@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { assignQueens, generate } from './generate';
+import { assignQueens, generate } from './board';
 import { create } from '../utils/lcg';
 
 describe('assignQueens', () => {
