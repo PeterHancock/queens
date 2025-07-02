@@ -1,13 +1,14 @@
 import type { Board } from "../model/generate";
 
-const queenColors = [...Array(8)].map((_, i) => {
-  const hue = (i * 30) % 360; // Generate a hue for each queen
-  return `hsl(${hue}, 100%, 50%)`; // Bright color for each queen
-});
 
 export const drawBoard = (ctx: CanvasRenderingContext2D, board: Board, width: number, height: number): void => {
   const size = board.length;
   const cellSize = Math.min(width, height) / size;
+
+const queenColors = [...Array(size)].map((_, i) => {
+  const hue = (i * 30) % 360; // Generate a hue for each queen
+  return `rgb(${hue},${hue},${hue})`; // Bright color for each queen
+});
 
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = "#fff";
@@ -17,12 +18,12 @@ export const drawBoard = (ctx: CanvasRenderingContext2D, board: Board, width: nu
     for (let col = 0; col < size; col++) {
       const cell = board[row][col];
       
-      ctx.fillStyle = queenColors[cell.queenId]; // Queen color
+      ctx.fillStyle = queenColors[(cell.queenId * 3) % size]; // Queen color
 
       ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
       if (cell.isQueen) {
-        ctx.fillStyle = "#000"; // Red for queens
-          ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+        ctx.fillStyle = "#f004"; // Red for queens
+          ctx.fillRect(col * cellSize, row * cellSize, cellSize/2, cellSize/2);
       } 
     }
   }

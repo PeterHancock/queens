@@ -11,12 +11,17 @@ const base = [
   5,
   6,
   7,
- // 8,9,10,11,12,13,14,15
+  8,
+  9,
+  10
+  ,11,
+  12,
+  // 13,14,15
 ] as const;
 
 type Size = typeof base.length;
 
-const size: Size = base.length;
+export const size: Size = base.length;
 
 type Coord = typeof base[number];
 
@@ -60,16 +65,21 @@ export const assignQueens = (pick?: () => number): Queens => {
 
 const getNeighbors = (row: Coord, col: Coord): [Coord, Coord][] => {
   const neighbors: [Coord, Coord][] = [];
-  for (let i = -1; i <= 1; i++) {
-    for (let j = -1; j <= 1; j++) {
-      if (i === 0 && j === 0) continue; // skip the cell itself
-      const newRow = row + i;
-      const newCol = col + j;
-      if (newRow >= 0 && newRow < coords.length && newCol >= 0 && newCol < coords.length) {
-        neighbors.push([newRow as Coord, newCol as Coord]);
-      }
-    }
+  if (row > 0) {
+    neighbors.push([row - 1 as Coord, col]);
   }
+  if (col > 0) {
+    neighbors.push([row, col - 1 as Coord]);
+  }
+
+    if (row < size - 1) {
+    neighbors.push([row  + 1  as Coord, col]);
+  }
+  if (col < size - 1) {
+    neighbors.push([row, col + 1 as Coord]);
+  }
+
+
   return neighbors;
 }
 
@@ -90,7 +100,6 @@ export const generateBoard = (queens: Queens, pick?: () => number): Board => {
 
   dumpBoard2(board);
 
-
   while (bordered.size > 0) { // limit iterations to prevent infinite loop
     const choice = rand(bordered.size);
     const index = [...bordered][choice];
@@ -100,14 +109,22 @@ export const generateBoard = (queens: Queens, pick?: () => number): Board => {
 
     const occupiedNeighbors = neighbors.filter(([nRow, nCol]) => board[nRow][nCol] !== null);
 
+
     const [nRow, nCol] = occupiedNeighbors[rand(occupiedNeighbors.length)];
 
     board[row][col] = board[nRow][nCol];
+
+    if (row === 3 && col === 5) {
+      console.log('Adding border cell', row, col);
+      console.log(neighbors, occupiedNeighbors, row, col)
+    }
+
 
     bordered.delete(index);
     neighbors.forEach(([nRow, nCol]) => {
       if (board[nRow][nCol] === null) {
         bordered.add(nRow * size + nCol);
+
       }
     });
   }
@@ -116,7 +133,7 @@ export const generateBoard = (queens: Queens, pick?: () => number): Board => {
     row,
     col,
     queenId: board[row][col]!,
-    isQueen: queens[col] === row,
+    isQueen: queens[row] === col,
   }))) as Board;
 
 
