@@ -37,3 +37,11 @@ export type Grid<T> = Tuple<Tuple<T, Size>, Size>;
 export type Board = Grid<GridCell>;
 
 export type Queens = Tuple<Coord, Size>;
+
+export type Domain = {
+  queenId: Coord;
+  cellMap: Record<number, Record<number, GridCell>>;
+}
+
+
+

@@ -1,8 +1,8 @@
 import React, { useLayoutEffect, useRef, useMemo } from "react";
-import { generate } from "./model/board";
-import { drawBoard, drawCell, getCoordinates } from "./draw/draw-board";
-import { createInitial, toggle } from "./model/selected";
-import { foundSolution } from "./model/rules";
+import { generateBoard } from "./model/board";
+import { drawBoard, drawInvalidSections, drawSelected, getCoordinates } from "./draw/draw-board";
+import { createInitial, toggle as toggleSelection } from "./model/selected";
+import { validateSelection } from "./model/rules";
 
 type Props = {
   width: number;
@@ -13,7 +13,7 @@ export const Board: React.FC<Props> = ({ width }) => {
   const [solved, setSolved] = React.useState(false);
   const canvas = useRef<HTMLCanvasElement | null>(null);
 
-  const board = useMemo(() => generate(Date.now()), []);
+  const board = useMemo(() => generateBoard(Date.now()), []);
 
   const selectedRef = useRef(createInitial());
 
@@ -33,9 +33,32 @@ export const Board: React.FC<Props> = ({ width }) => {
     const ctx = canvas.current?.getContext("2d");
     if (!ctx) return;
     const [row, col] = getCoordinates(event, board, width);
-    const state = toggle(selectedRef.current, row, col);
-    drawCell(ctx, board, width, row, col, state);
-    setSolved(foundSolution(board, selectedRef.current));
+
+    toggleSelection(selectedRef.current, row, col);
+
+    drawBoard(ctx, board, width);
+    drawSelected(ctx, board, selectedRef.current, width);
+
+    const state = validateSelection(board, selectedRef.current);
+
+    if (state === true) {
+      setSolved(true);
+      return;
+    } else if (state) {
+      drawInvalidSections(ctx,board, width, state)
+      // state.invalidDomains.forEach((domain) => {
+      //   drawDomainShade(ctx, domain, board, width); // Highlight invalid domains
+      // });
+
+      // state.invalidRows.forEach((row) => {
+      //   row.forEach((cell) => {
+      //     drawCell(ctx, board, width, cell.row, cell.col, 0); // Clear invalid cells
+      //   });
+      // }
+      // );
+     
+    }
+
   };
 
   return (
