@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { assignQueens, generate } from './board';
+import { assignQueens, generateBoard } from './board';
 import { create } from '../utils/lcg';
 
 describe('assignQueens', () => {
@@ -23,6 +23,6 @@ describe('assignQueens', () => {
 
 describe('generate', () => {
   it('should throw "Not implemented yet" error', () => {
-    expect(() => generate()).toThrowError('Not implemented yet');
+    expect(() => generateBoard()).toThrowError('Not implemented yet');
   });
 });
