@@ -9,9 +9,8 @@ describe('assignQueens', () => {
     expect(result).toEqual([3, 1, 4, 7, 2, 6, 0, 5]);
 
     for (let i = 0; i < result.length; i++) {
-      console.log('  '.repeat(result[i]), '* ', );
+      console.log('  '.repeat(result[i]), '* ');
     }
-
   });
 
   it('should have only unique values', () => {

@@ -1,15 +1,19 @@
-import React, { useLayoutEffect, useRef, useMemo } from "react";
-import { generateBoard } from "./model/board";
-import { drawBoard, drawInvalidSections, drawSelected, getCoordinates } from "./draw/draw-board";
-import { createInitial, toggle as toggleSelection } from "./model/selected";
-import { validateSelection } from "./model/rules";
+import React, { useLayoutEffect, useRef, useMemo } from 'react';
+import { generateBoard } from './model/board';
+import {
+  drawBoard,
+  drawInvalidSections,
+  drawSelected,
+  getCoordinates,
+} from './draw/draw-board';
+import { createInitial, toggle as toggleSelection } from './model/selected';
+import { validateSelection } from './model/rules';
 
 type Props = {
   width: number;
-}
+};
 
 export const Board: React.FC<Props> = ({ width }) => {
-
   const [solved, setSolved] = React.useState(false);
   const canvas = useRef<HTMLCanvasElement | null>(null);
 
@@ -18,7 +22,7 @@ export const Board: React.FC<Props> = ({ width }) => {
   const selectedRef = useRef(createInitial());
 
   useLayoutEffect(() => {
-    const ctx = canvas.current?.getContext("2d");
+    const ctx = canvas.current?.getContext('2d');
     if (!ctx) return;
 
     drawBoard(ctx, board, width);
@@ -30,9 +34,11 @@ export const Board: React.FC<Props> = ({ width }) => {
 
   const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (solved) return;
-    const ctx = canvas.current?.getContext("2d");
+    const ctx = canvas.current?.getContext('2d');
     if (!ctx) return;
-    const [row, col] = getCoordinates(event, board, width);
+    const [row, col] = getCoordinates(event, board, width, 10);
+
+    if (row < 0 || col < 0) return; // Out of bounds click
 
     toggleSelection(selectedRef.current, row, col);
 
@@ -45,29 +51,17 @@ export const Board: React.FC<Props> = ({ width }) => {
       setSolved(true);
       return;
     } else if (state) {
-      drawInvalidSections(ctx,board, width, state)
-      // state.invalidDomains.forEach((domain) => {
-      //   drawDomainShade(ctx, domain, board, width); // Highlight invalid domains
-      // });
-
-      // state.invalidRows.forEach((row) => {
-      //   row.forEach((cell) => {
-      //     drawCell(ctx, board, width, cell.row, cell.col, 0); // Clear invalid cells
-      //   });
-      // }
-      // );
-     
+      drawInvalidSections(ctx, board, width, state);
     }
-
   };
 
   return (
     <div className="relative flex justify-center items-center">
-      {solved &&
+      {solved && (
         <div className="absolute text-9xl font-bold opacity-80 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
           <div>Solved!</div>
         </div>
-      }
+      )}
       <canvas
         id="board-canvas"
         onClick={handleClick}
@@ -79,4 +73,3 @@ export const Board: React.FC<Props> = ({ width }) => {
     </div>
   );
 };
-

@@ -22,20 +22,23 @@ const crownPath = `
 
 const svgViewBoxSize = 256;
 
-export const drawCrown = (ctx: CanvasRenderingContext2D, row: number, col: number, cellSize: number, color: `#${string}`): void => {
+export const drawCrown = (
+  ctx: CanvasRenderingContext2D,
+  row: number,
+  col: number,
+  cellSize: number,
+  color: `#${string}`
+): void => {
   const path = new Path2D(crownPath);
 
   const padding = cellSize * 0;
   const scale = (cellSize - 2 * padding) / svgViewBoxSize;
 
   ctx.save();
-  ctx.translate(
-    col * cellSize + cellSize / 2,
-    row * cellSize + cellSize / 2
-  );
+  ctx.translate(col * cellSize + cellSize / 2, row * cellSize + cellSize / 2);
   ctx.scale(scale, scale);
   ctx.translate(-svgViewBoxSize / 2, -svgViewBoxSize / 2);
   ctx.fillStyle = color;
   ctx.fill(path);
   ctx.restore();
-}
+};
