@@ -1,42 +1,29 @@
 import { forEachCellInDomain, forEachDomain } from './board';
-import { forEachCell } from './grid';
 import type { SelectionGrid } from './selected';
-import type { Board, Coord, Domain } from './types';
-
-const foundSolution = (board: Board, selectionGrid: SelectionGrid): boolean => {
-  const size = board.length;
-
-  let numQueens = 0;
-  const rows: Set<Coord> = new Set();
-  const cols: Set<Coord> = new Set();
-
-  forEachCell(selectionGrid, (cell, row, col) => {
-    if (cell === 2) {
-      // Selected
-      numQueens++;
-    }
-    rows.add(row);
-    cols.add(col);
-  });
-
-  return numQueens === size && rows.size === size && cols.size === size;
-};
+import type { Board, Domain } from './types';
 
 export type InvalidSections = {
   invalidDomains: Domain[];
-  invalidRows: Coord[];
-  invalidCols: Coord[];
-  invalidDiagonals: [Coord, Coord][];
+  invalidRows: number[];
+  invalidCols: number[];
+  invalidDiagonals: [number, number][];
 };
 
-type ValidationResult = InvalidSections | null | true;
+type ValidationResult =
+  | ({
+      state: 'invalid';
+    } & InvalidSections)
+  | {
+      state: 'solved' | 'started' | 'cleared';
+    };
 
 export const validateSelection = (
   board: Board,
   selected: SelectionGrid
 ): ValidationResult => {
   const invalidDomains: Set<Domain> = new Set();
-
+  let numQueens = 0;
+  let numEmpty = 0;
   const queens: Record<number, Set<number>> = {};
 
   const rows: Record<number, number> = {};
@@ -47,6 +34,7 @@ export const validateSelection = (
     forEachCellInDomain(domain, (cell) => {
       const { row, col } = cell;
       if (selected[row][col] === 2) {
+        numQueens++;
         rows[row] = (rows[row] || 0) + 1;
         cols[col] = (cols[col] || 0) + 1;
         queens[row] = queens[row] || new Set();
@@ -55,21 +43,23 @@ export const validateSelection = (
           invalidDomains.add(domain);
         }
         queenInDomain = true;
+      } else if (selected[row][col] === 0) {
+        numEmpty++;
       }
     });
   });
 
   const invalidRows = Object.entries(rows)
     .filter(([, count]) => count > 1)
-    .map(([row]) => parseInt(row) as Coord);
+    .map(([row]) => parseInt(row));
   const invalidCols = Object.entries(cols)
     .filter(([, count]) => count > 1)
-    .map(([col]) => parseInt(col) as Coord);
+    .map(([col]) => parseInt(col));
 
-  const invalidDiagonals: [Coord, Coord][] = [];
+  const invalidDiagonals: [number, number][] = [];
 
   Object.entries(queens).forEach(([rowS, cols]) => {
-    const row = parseInt(rowS) as Coord;
+    const row = parseInt(rowS);
     cols.forEach((col) => {
       if (
         queens[row - 1]?.has(col - 1) ||
@@ -77,7 +67,7 @@ export const validateSelection = (
         queens[row + 1]?.has(col - 1) ||
         queens[row + 1]?.has(col + 1)
       ) {
-        invalidDiagonals.push([row, col as Coord]);
+        invalidDiagonals.push([row, col]);
       }
     });
     const colCount = Object.keys(cols).length;
@@ -90,10 +80,15 @@ export const validateSelection = (
     invalidDomains.size === 0 &&
     invalidDiagonals.length === 0
   ) {
-    return foundSolution(board, selected) ? true : null;
+    return numQueens === board.length
+      ? { state: 'solved' }
+      : numEmpty === board.length * board.length
+        ? { state: 'cleared' }
+        : { state: 'started' };
   }
 
   return {
+    state: 'invalid',
     invalidDomains: Array.from(invalidDomains),
     invalidRows,
     invalidCols,

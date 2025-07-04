@@ -1,37 +1,19 @@
-import type { Tuple } from '../utils/types';
-
-const base = [
-  0, 1, 2, 3, 4, 5, 6, 7,
-  // 8,
-  // 9,
-  // 10
-  // ,11,
-  // 12,
-  // 13,14,15
-] as const;
-
-export type Size = typeof base.length;
-
-export const size: Size = base.length;
-
-export type Coord = (typeof base)[number];
-
-export const coords: Tuple<Coord, Size> = base as Tuple<Coord, Size>;
+export type Sizes = 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16;
 
 export type GridCell = {
-  row: Coord;
-  col: Coord;
-  queenId: Coord;
+  row: number;
+  col: number;
+  queenId: number;
   isQueen: boolean;
 };
 
-export type Grid<T> = Tuple<Tuple<T, Size>, Size>;
+export type Grid<T> = Array<Array<T>>;
 
 export type Board = Grid<GridCell>;
 
-export type Queens = Tuple<Coord, Size>;
+export type Queens = Array<number>;
 
 export type Domain = {
-  queenId: Coord;
+  queenId: number;
   cellMap: Record<number, Record<number, GridCell>>;
 };

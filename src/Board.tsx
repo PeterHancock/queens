@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useMemo } from 'react';
+import React, { useLayoutEffect, useRef, useMemo, useEffect } from 'react';
 import { generateBoard } from './model/board';
 import {
   drawBoard,
@@ -8,18 +8,34 @@ import {
 } from './draw/draw-board';
 import { createInitial, toggle as toggleSelection } from './model/selected';
 import { validateSelection } from './model/rules';
+import type { Sizes } from './model/types';
 
 type Props = {
+  size: Sizes;
   width: number;
+  onSolved?: () => void;
+  onStarted?: () => void;
+  onCleared?: () => void;
 };
 
-export const Board: React.FC<Props> = ({ width }) => {
+export const Board: React.FC<Props> = ({
+  size,
+  width,
+  onSolved = () => {},
+  onCleared = () => {},
+  onStarted = () => {},
+}) => {
   const [solved, setSolved] = React.useState(false);
   const canvas = useRef<HTMLCanvasElement | null>(null);
 
-  const board = useMemo(() => generateBoard(Date.now()), []);
+  const board = useMemo(() => generateBoard(size, Date.now()), [size]);
 
-  const selectedRef = useRef(createInitial());
+  const selectedRef = useRef(createInitial(size));
+
+  useEffect(() => {
+    selectedRef.current = createInitial(size);
+    setSolved(false);
+  }, [size]);
 
   useLayoutEffect(() => {
     const ctx = canvas.current?.getContext('2d');
@@ -28,9 +44,9 @@ export const Board: React.FC<Props> = ({ width }) => {
     drawBoard(ctx, board, width);
 
     return () => {
-      selectedRef.current = createInitial();
+      selectedRef.current = createInitial(size);
     };
-  }, [board, width]);
+  }, [size, board, width]);
 
   const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     if (solved) return;
@@ -45,31 +61,52 @@ export const Board: React.FC<Props> = ({ width }) => {
     drawBoard(ctx, board, width);
     drawSelected(ctx, board, selectedRef.current, width);
 
-    const state = validateSelection(board, selectedRef.current);
+    const selection = validateSelection(board, selectedRef.current);
 
-    if (state === true) {
+    if (selection.state === 'solved') {
       setSolved(true);
-      return;
-    } else if (state) {
-      drawInvalidSections(ctx, board, width, state);
+      onSolved();
+    } else if (selection.state === 'started') {
+      onStarted();
+    } else if (selection.state === 'cleared') {
+      onCleared();
+    } else if (selection.state === 'invalid') {
+      drawInvalidSections(ctx, board, width, selection);
     }
   };
 
   return (
-    <div className="relative flex justify-center items-center">
+    <div className="flex flex-col justify-center items-center space-y-6 relative">
       {solved && (
-        <div className="absolute text-9xl font-bold opacity-80 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+        <div className="absolute text-9xl font-bold opacity-80 text-white drop-shadow-[0_3px_3px_rgba(0,0,0,0.8)]">
           <div>Solved!</div>
         </div>
       )}
       <canvas
         id="board-canvas"
+        className="border-10 border-black rounded-lg shadow-2xl ring-4 ring-white ring-offset-2 ring-offset-black"
         onClick={handleClick}
         ref={canvas}
         width={width}
         height={width}
-        className="border-10 border-black rounded-lg shadow-2xl ring-4 ring-white ring-offset-2 ring-offset-black"
       ></canvas>
+
+      <div>
+        <button
+          className="px-4 py-2 bg-white text-black rounded shadow font-semibold hover:bg-gray-200 transition"
+          onClick={() => {
+            selectedRef.current = createInitial(size);
+            setSolved(false);
+            const ctx = canvas.current?.getContext('2d');
+            if (ctx) {
+              drawBoard(ctx, board, width);
+            }
+            onCleared();
+          }}
+        >
+          Reset
+        </button>
+      </div>
     </div>
   );
 };
