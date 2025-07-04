@@ -2,7 +2,9 @@ import { forEachCellInDomain, forEachDomain } from '../model/board';
 import { forEachCell } from '../model/grid';
 import type { InvalidSections } from '../model/rules';
 import type { SelectionGrid } from '../model/selected';
-import { coords, type Board, type Coord, type Domain } from '../model/types';
+import { type Board, type Domain } from '../model/types';
+
+type Coord = number;
 
 import { drawCrown } from './draw-crown';
 
@@ -158,13 +160,13 @@ export const drawInvalidSections = (
   });
 
   invalidSections.invalidRows.forEach((row) => {
-    coords.forEach((col) => {
+    board.forEach((_, col) => {
       addInvalidCell(row, col);
     });
   });
 
   invalidSections.invalidCols.forEach((col) => {
-    coords.forEach((row) => {
+    board.forEach((_, row) => {
       addInvalidCell(row, col);
     });
   });
@@ -175,8 +177,8 @@ export const drawInvalidSections = (
 
   const flatCells = Object.entries(invalidCells).flatMap(([row, cols]) => {
     return Array.from(cols).map((col) => ({
-      row: parseInt(row) as Coord,
-      col: col as Coord,
+      row: parseInt(row),
+      col,
     }));
   });
 
@@ -187,7 +189,7 @@ export const drawDomainShade = (
   ctx: CanvasRenderingContext2D,
   board: Board,
   width: number,
-  cells: { row: Coord; col: Coord }[]
+  cells: { row: number; col: number }[]
 ): void => {
   const size = board.length;
   const cellSize = width / size;
