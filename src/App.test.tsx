@@ -10,7 +10,9 @@ describe('App', () => {
 
   it('renders the welcome message', () => {
     render(<App />);
-    expect(screen.getByText(/A clone of the the Linked in Queens game/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/A clone of the the Linked in Queens game/)
+    ).toBeInTheDocument();
   });
 
   it('renders the Vite logo', () => {
