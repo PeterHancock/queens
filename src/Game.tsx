@@ -23,14 +23,13 @@ export const Game: React.FC<{ width: number }> = ({ width }) => {
 
   return (
     <div className="game">
+      <Board
+        size={size}
+        width={width}
+        onStarted={handleStarted}
+        onCleared={handleCleared}
+      />
       <div className="mt-4 mb-4">
-        <label
-          htmlFor="board-size"
-          className="block text-white mb-2 font-semibold"
-        >
-          <span className="ml-2 text-blue-200">Board Size: </span>
-          {size}
-        </label>
         <input
           id="board-size"
           type="range"
@@ -38,16 +37,10 @@ export const Game: React.FC<{ width: number }> = ({ width }) => {
           min={5}
           max={16}
           value={size}
-          className="w-full accent-blue-500"
+          className="w-full bg-white accent-black"
           onChange={handleSizeChange}
         />
       </div>
-      <Board
-        size={size}
-        width={width}
-        onStarted={handleStarted}
-        onCleared={handleCleared}
-      />
     </div>
   );
 };
