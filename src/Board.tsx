@@ -13,29 +13,31 @@ import type { Sizes } from './model/types';
 type Props = {
   size: Sizes;
   width: number;
+  seed?: number;
   onSolved?: () => void;
   onStarted?: () => void;
-  onCleared?: () => void;
+  onReset?: () => void;
 };
 
 export const Board: React.FC<Props> = ({
   size,
   width,
-  onSolved = () => {},
-  onCleared = () => {},
-  onStarted = () => {},
+  seed = Date.now(),
+  onSolved = () => { },
+  onReset = () => { },
+  onStarted = () => { },
 }) => {
   const [solved, setSolved] = React.useState(false);
   const canvas = useRef<HTMLCanvasElement | null>(null);
 
-  const board = useMemo(() => generateBoard(size, Date.now()), [size]);
+  const board = useMemo(() => generateBoard(size, seed), [size, seed]);
 
   const selectedRef = useRef(createInitial(size));
 
   useEffect(() => {
     selectedRef.current = createInitial(size);
     setSolved(false);
-  }, [size]);
+  }, [size, seed]);
 
   useLayoutEffect(() => {
     const ctx = canvas.current?.getContext('2d');
@@ -69,7 +71,7 @@ export const Board: React.FC<Props> = ({
     } else if (selection.state === 'started') {
       onStarted();
     } else if (selection.state === 'cleared') {
-      onCleared();
+      onReset();
     } else if (selection.state === 'invalid') {
       drawInvalidSections(ctx, board, width, selection);
     }
@@ -90,23 +92,6 @@ export const Board: React.FC<Props> = ({
         width={width}
         height={width}
       ></canvas>
-
-      <div>
-        <button
-          className="px-4 py-2 bg-white text-black rounded shadow font-semibold hover:bg-gray-200 transition"
-          onClick={() => {
-            selectedRef.current = createInitial(size);
-            setSolved(false);
-            const ctx = canvas.current?.getContext('2d');
-            if (ctx) {
-              drawBoard(ctx, board, width);
-            }
-            onCleared();
-          }}
-        >
-          Reset
-        </button>
-      </div>
     </div>
   );
 };
