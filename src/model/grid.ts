@@ -11,13 +11,10 @@ export const createGrid = <T>(
 export const createUniformGrid = <T>(size: Sizes, t: T): Grid<T> =>
   createGrid(size, () => t);
 
-export const forEachCell = <T>(
-  grid: Grid<T>,
-  callback: (cell: T, row: number, col: number) => void
-): void => {
+export function* cells<T>(grid: Grid<T>): Generator<[T, number, number]> {
   for (let row = 0; row < grid.length; row++) {
     for (let col = 0; col < grid.length; col++) {
-      callback(grid[row][col], row, col);
+      yield [grid[row][col], row, col];
     }
   }
-};
+}

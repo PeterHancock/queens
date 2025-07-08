@@ -15,5 +15,8 @@ export type Queens = Array<number>;
 
 export type Domain = {
   queenId: number;
+
+  cells: GridCell[];
+
   cellMap: Record<number, Record<number, GridCell>>;
 };

@@ -1,18 +1,17 @@
-import { forEachCellInDomain, forEachDomain } from './board';
+import { domains } from './board';
 import type { SelectionGrid } from './selected';
 import type { Board, Domain } from './types';
 
 export type InvalidSections = {
+  state: 'invalid';
   invalidDomains: Domain[];
   invalidRows: number[];
   invalidCols: number[];
   invalidDiagonals: [number, number][];
 };
 
-type ValidationResult =
-  | ({
-      state: 'invalid';
-    } & InvalidSections)
+export type ValidationResult =
+  | InvalidSections
   | {
       state: 'solved' | 'started' | 'cleared';
     };
@@ -29,9 +28,9 @@ export const validateSelection = (
   const rows: Record<number, number> = {};
   const cols: Record<number, number> = {};
 
-  forEachDomain(board, (domain) => {
+  for (const domain of domains(board)) {
     let queenInDomain = false;
-    forEachCellInDomain(domain, (cell) => {
+    for (const cell of domain.cells) {
       const { row, col } = cell;
       if (selected[row][col] === 2) {
         numQueens++;
@@ -46,8 +45,8 @@ export const validateSelection = (
       } else if (selected[row][col] === 0) {
         numEmpty++;
       }
-    });
-  });
+    }
+  }
 
   const invalidRows = Object.entries(rows)
     .filter(([, count]) => count > 1)

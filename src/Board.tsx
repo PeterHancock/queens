@@ -23,9 +23,9 @@ export const Board: React.FC<Props> = ({
   size,
   width,
   seed = Date.now(),
-  onSolved = () => { },
-  onReset = () => { },
-  onStarted = () => { },
+  onSolved = () => {},
+  onReset = () => {},
+  onStarted = () => {},
 }) => {
   const [solved, setSolved] = React.useState(false);
   const canvas = useRef<HTMLCanvasElement | null>(null);

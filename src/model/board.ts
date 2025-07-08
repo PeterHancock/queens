@@ -1,7 +1,7 @@
 import { create } from '../utils/lcg';
 import { random } from '../utils/random';
-import type { Queens, Board, Grid, Domain, GridCell, Sizes } from './types';
-import { createUniformGrid, createGrid, forEachCell } from './grid';
+import type { Queens, Board, Grid, Domain, Sizes } from './types';
+import { createUniformGrid, createGrid, cells } from './grid';
 
 const checkQueens = (order: Queens): boolean => {
   let j = -2;
@@ -99,31 +99,22 @@ export const generateDomains = (queens: Queens, pick?: () => number): Board => {
   return finalGrid;
 };
 
-export const forEachDomain = (
-  board: Board,
-  callback: (domain: Domain) => void
-): void => {
+export function* domains(board: Board): Generator<Domain> {
   const domains: Record<number, Domain> = {} as Record<number, Domain>;
 
-  forEachCell(board, (cell) => {
+  for (const [cell] of cells(board)) {
     const domain: Domain = (domains[cell.queenId] =
       domains[cell.queenId] || {});
     domain.queenId = cell.queenId;
+    domain.cells = domain.cells || [];
+    domain.cells.push(cell);
     domain.cellMap = domain.cellMap || {};
     domain.cellMap[cell.row] = domain.cellMap[cell.row] || {};
     domain.cellMap[cell.row][cell.col] = cell;
-  });
-  Object.values(domains).forEach(callback);
-};
+  }
 
-export const forEachCellInDomain = (
-  domain: Domain,
-  callback: (domain: GridCell) => void
-): void => {
-  Object.values(domain.cellMap).forEach((rowMap) => {
-    Object.values(rowMap).forEach(callback);
-  });
-};
+  yield* Object.values(domains);
+}
 
 export const generateBoard = (size: Sizes, seed = 0): Board => {
   const pick = create(BigInt(seed)).rand;
