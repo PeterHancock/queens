@@ -1,5 +1,5 @@
-import { forEachCellInDomain, forEachDomain } from '../model/board';
-import { forEachCell } from '../model/grid';
+import { domains } from '../model/board';
+import { cells } from '../model/grid';
 import type { InvalidSections } from '../model/rules';
 import type { SelectionGrid } from '../model/selected';
 import { type Board, type Domain } from '../model/types';
@@ -88,6 +88,7 @@ export const drawCell = (
     );
   }
 
+  console.log(selected, row, col);
   switch (selected) {
     case 0:
       return;
@@ -105,10 +106,10 @@ export const drawSelected = (
   selected: SelectionGrid,
   width: number
 ): void => {
-  forEachCell(selected, (cell, row, col) => {
-    if (cell === 0) return; // Not selected
+  for (const [cell, row, col] of cells(selected)) {
+    if (cell === 0) continue; // Not selected
     drawCell(ctx, board, width, row, col, cell);
-  });
+  }
 };
 
 const drawDomainOutline = (
@@ -119,7 +120,8 @@ const drawDomainOutline = (
   ctx.strokeStyle = '#000';
   ctx.lineWidth = 3;
 
-  forEachCellInDomain(domain, (cell) => {
+
+  for (const cell of domain.cells) {
     const { row, col } = cell;
 
     if (!domain.cellMap[row - 1]?.[col]) {
@@ -135,7 +137,7 @@ const drawDomainOutline = (
       ctx.lineTo(col * cellSize, (row + 1) * cellSize);
       ctx.stroke();
     }
-  });
+  }
 };
 
 export const drawInvalidSections = (
@@ -154,9 +156,9 @@ export const drawInvalidSections = (
   };
 
   invalidSections.invalidDomains.forEach((domain) => {
-    forEachCellInDomain(domain, (cell) => {
+    for (const cell of domain.cells) {
       addInvalidCell(cell.row, cell.col);
-    });
+    }
   });
 
   invalidSections.invalidRows.forEach((row) => {
@@ -253,18 +255,18 @@ export const drawBoard = (
   ctx.fillStyle = '#fff';
   ctx.fillRect(0, 0, width, width);
 
-  forEachCell(board, (cell, row, col) => {
+  for (const [cell, row, col] of cells(board)) {
     ctx.fillStyle = colors[cell.queenId];
     ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
     if (drawQueen && cell.isQueen) {
       ctx.fillStyle = queenColor;
       ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
     }
-  });
+  }
 
-  forEachDomain(board, (domain) => {
+  for (const domain of domains(board)) {
     drawDomainOutline(ctx, domain, cellSize);
-  });
+  }
 
   drawGridLines(ctx, size, cellSize);
 };
